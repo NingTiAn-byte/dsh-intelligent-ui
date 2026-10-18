@@ -1,0 +1,7 @@
+- insert:
+    - id: intelligent-ui
+      name: dsh-intelligent-ui
+      config:
+        maxDocumentChars: 200000
+        minHeight: 180
+        maxHeight: 900

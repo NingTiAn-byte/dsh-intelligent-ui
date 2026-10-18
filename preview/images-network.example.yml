@@ -1,0 +1,5 @@
+# Optional overlay. Copy to ignored images-network.patch.yml before editing.
+# Configure a proxy only if your network needs it; never commit credentials.
+- id: intelligent-ui
+  config:
+    imageProxyUrl: ''

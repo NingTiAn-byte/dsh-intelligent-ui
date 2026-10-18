@@ -1,0 +1,34 @@
+{
+  "version": "1.9.4",
+  "sources": [
+    "https://unpkg.com/leaflet@1.9.4/",
+    "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/0/0/0.jpeg"
+  ],
+  "files": [
+    {
+      "sha256": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
+      "name": "leaflet.js.txt",
+      "bytes": 147552
+    },
+    {
+      "sha256": "a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6",
+      "name": "leaflet.css.txt",
+      "bytes": 14806
+    },
+    {
+      "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb",
+      "name": "LICENSE.txt",
+      "bytes": 1395
+    },
+    {
+      "sha256": "7579ea34c626c2b3ecf4adca28aa5b076882170fa13ecf3387e74f75b763e90a",
+      "name": "world.jpeg",
+      "bytes": 17819
+    },
+    {
+      "sha256": "ded5329439b67c4b0af766fe244a2630ea3cad309a2148ac70dacc569b233584",
+      "name": "world-data.txt",
+      "bytes": 23783
+    }
+  ]
+}

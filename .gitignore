@@ -1,0 +1,38 @@
+# Dependencies and generated output
+node_modules/
+lib/
+dist/
+artifacts/
+coverage/
+playwright-report/
+test-results/
+preview/index.html
+preview/checks.html
+preview/local.patch.yml
+preview/mcp.config.json
+preview/images-network.patch.yml
+tsconfig.*.local.json
+# Local settings, sessions and credentials
+.env
+.env.*
+!.env.example
+*.local.*
+*.log
+credentials*.json
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Local validation reports and historical notes
+.local-docs/
+**/*验收*.md
+**/*验证*.md
+**/*报告*.md
+**/*对照*.md
+**/*复核*.md
+**/*路线*.md
+**/*validation*.md
+**/*acceptance*.md
+**/*TODO*.md
