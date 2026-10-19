@@ -15,7 +15,7 @@ const personal = /[A-Z]:[\\/]Users[\\/][^\s"'\\/]+|[A-Z]:[\\/](?:devTools|Github
 const secret = /\bsk-[A-Za-z0-9]{20,}\b|\bghp_[A-Za-z0-9]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{30,}\b/
 for (const file of files) {
   if ((file !== '.env.example' && forbidden.test(file)) || generated.test(file)) errors.push(`${file}: local/generated file`)
-  if (/\.(?:pbf|jpeg|png|jpg|woff2?)$/i.test(file)) continue
+  if (/\.(?:pbf|jpeg|png|jpg|mp4|woff2?)$/i.test(file)) continue
   const text = readFileSync(join(root, file), 'utf8')
   if (personal.test(text) || secret.test(text)) errors.push(`${file}: possible personal path or credential (value hidden)`)
   if (file.endsWith('.md') && /(?:验收|验证|TODO|复核|对照|路线)/i.test(file)) errors.push(`${file}: local validation/history document`)

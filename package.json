@@ -4,6 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Replayable sandboxed generative UI for DeepSeek Harness",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NingTiAn-byte/dsh-intelligent-ui.git"
+  },
+  "homepage": "https://github.com/NingTiAn-byte/dsh-intelligent-ui#readme",
+  "bugs": {
+    "url": "https://github.com/NingTiAn-byte/dsh-intelligent-ui/issues"
+  },
+  "author": "NingTiAn-byte",
+  "keywords": ["dsh-plugin", "deepseek-harness", "generative-ui", "visualization", "mcp"],
   "exports": {
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
@@ -13,7 +23,8 @@
     "lib",
     "cordis.patch.yml",
     "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "README.en.md"
   ],
   "engines": {
     "dsh": "0.2.1-rc.2",

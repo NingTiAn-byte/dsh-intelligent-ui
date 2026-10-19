@@ -10,9 +10,12 @@ $ErrorActionPreference = 'Stop'
 $pluginRoot = Split-Path $PSScriptRoot
 if (-not $DshCli) { $DshCli = Join-Path $env:LOCALAPPDATA 'Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' }
 if (-not (Test-Path -LiteralPath $DshCli)) { throw 'Set DSH_CLI or -DshCli to the official rc.2 dsh launcher.' }
+$DshCli = (Resolve-Path -LiteralPath $DshCli).Path
 $version = (& $DshCli --version | Out-String).Trim()
 if ($LASTEXITCODE -ne 0 -or $version -ne '0.2.1-rc.2') { throw "Expected dsh 0.2.1-rc.2; found $version" }
 if (-not $env:DSH_HOME) { $env:DSH_HOME = Join-Path $pluginRoot 'artifacts\dsh-home' }
+$env:DSH_HOME = [IO.Path]::GetFullPath($env:DSH_HOME)
+New-Item -ItemType Directory -Path $env:DSH_HOME -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $pluginRoot 'artifacts') -Force | Out-Null
 Push-Location $pluginRoot
 try {
@@ -32,6 +35,10 @@ try {
     $launchArgs += @('--port', [string]$Port)
     if ($NoOpen) { $launchArgs += '--no-open' }
   }
-  & $DshCli @launchArgs
-  if ($LASTEXITCODE -ne 0) { throw 'DSH launcher failed' }
+  # The plugin reads its own .env; DSH rejects DSH_* names in its invoking .env.
+  Push-Location $env:DSH_HOME
+  try {
+    & $DshCli @launchArgs
+    if ($LASTEXITCODE -ne 0) { throw 'DSH launcher failed' }
+  } finally { Pop-Location }
 } finally { Pop-Location }

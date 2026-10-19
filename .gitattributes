@@ -8,5 +8,6 @@
 *.ps1 text eol=crlf
 *.pbf binary
 *.jpeg binary
+*.mp4 binary
 # Preserve exact upstream bytes used by integrity manifests on every platform.
 vendor/** -text

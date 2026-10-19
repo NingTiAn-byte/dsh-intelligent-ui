@@ -15,7 +15,7 @@
 
 **中文** · [English](README.en.md)
 
-[快速开始](#快速开始) · [使用示例](#在对话中使用) · [工具清单](#工具清单) · [高德地图](#高德地图) · [开发文档](#开发与贡献)
+[快速开始](#快速开始) · [演示视频](#demo-explanation) · [使用示例](#在对话中使用) · [工具清单](#工具清单) · [高德地图](#高德地图) · [开发文档](#开发与贡献)
 
 </div>
 
@@ -62,6 +62,16 @@ DSH Intelligent UI 为这些问题提供交互式呈现。你描述目标，当�
 | 模型 | 在 DSH 中配置，需能使用工具 |
 | DSH 源码 | 普通构建不需要；内部 Conversation 投影测试需要匹配标签源码 |
 
+
+### 使用预构建包安装
+
+已有 DSH `0.2.1-rc.2` 和正在使用的 Web profile 时，可以直接安装 Release 中的预构建包，无需克隆源码或本地编译：
+
+```sh
+dsh plugin --profile web add https://github.com/NingTiAn-byte/dsh-intelligent-ui/releases/download/v1.2.1/dsh-intelligent-ui.tgz --ignore-scripts
+```
+
+将 `web` 替换为实际 profile 名称。安装后按宿主提示刷新或重启；模型服务使用该 profile 自己的配置。下方是源码开发和独立实例的启动方式。
 
 ### 1. 获取并构建
 
@@ -136,6 +146,16 @@ pwsh -NoProfile -File scripts/run-dsh.ps1 -DshCli '~\DeepSeek Harness\resources\
 
 **预期结果：** 在 DSH 对话中生成可交互的 FFT 原理演示。若希望调节采样点数、输入信号或逐步观察计算过程，可以在提示词中补充这些要求；具体交互取决于模型生成的界面。
 
+<a id="demo-explanation"></a>
+
+#### 演示视频：FFT 原理可视化
+
+实际操作录屏，约 49 秒：在聊天中查看 FFT 原理、切换输入信号并观察可视化结果。
+
+https://github.com/user-attachments/assets/b8585aaf-acec-4aef-8c22-271d9712d46f
+
+[查看或下载原始 MP4](docs/demos/explanation.mp4)
+
 ### 更多可复制的提示词
 
 <details>
@@ -162,7 +182,7 @@ pwsh -NoProfile -File scripts/run-dsh.ps1 -DshCli '~\DeepSeek Harness\resources\
 <summary><strong>地理介绍：高德地点与行程播放</strong></summary>
 
 ```text
-使用高德地图介绍上海的外滩、武康路、陆家嘴，城市指定上海。
+使用高德地图介绍上海的豫园、外滩、南京东路、陆家嘴、武康路和新天地，城市指定上海。
 按地点名称查询，提供地点卡片、选点和行程播放，并保留来源链接。
 ```
 
@@ -171,6 +191,16 @@ pwsh -NoProfile -File scripts/run-dsh.ps1 -DshCli '~\DeepSeek Harness\resources\
 首次准备地图需要联网。个别地点缺少可验证坐标时，会列入“尚未定位”提示，其余地点继续显示；所有地点均无法定位时才返回定位失败。底图下载、权限或配额错误会报告具体原因。
 
 </details>
+
+<a id="demo-map"></a>
+
+#### 演示视频：上海六站行程地图
+
+实际操作录屏，约 15 秒：查看高德底图上的六个地点、地点卡片和行程播放。
+
+https://github.com/user-attachments/assets/f0c09349-31e8-40ab-8ec4-137fc49d2de1
+
+[查看或下载原始 MP4](docs/demos/map.mp4)
 
 <details>
 <summary><strong>交互小应用：小游戏</strong></summary>
@@ -183,6 +213,16 @@ pwsh -NoProfile -File scripts/run-dsh.ps1 -DshCli '~\DeepSeek Harness\resources\
 复杂游戏和科学模拟仍需实际操作确认逻辑正确性。
 
 </details>
+
+<a id="demo-game"></a>
+
+#### 演示视频：复古打砖块游戏
+
+实际操作录屏，约 19 秒：展示聊天中生成的复古掌机界面与打砖块游戏。
+
+https://github.com/user-attachments/assets/75ea5215-ed3f-4e43-b1ba-41be68d12751
+
+[查看或下载原始 MP4](docs/demos/game.mp4)
 
 ### 如何验证主线
 

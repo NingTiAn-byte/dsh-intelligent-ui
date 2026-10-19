@@ -15,7 +15,7 @@ Describe an idea, interact with the result, replay it later, and bring questions
 
 [中文](README.md) · **English**
 
-[Quick start](#quick-start) · [Examples](#use-it-in-a-conversation) · [Tools](#tools) · [FAQ](#faq) · [Development](#development-and-contributing)
+[Quick start](#quick-start) · [Demo videos](#demo-explanation) · [Examples](#use-it-in-a-conversation) · [Tools](#tools) · [FAQ](#faq) · [Development](#development-and-contributing)
 
 </div>
 
@@ -64,6 +64,16 @@ DSH Intelligent UI handles those interactive presentations. Your current DSH mod
 | DSH source checkout | Not needed for normal builds; matching source is needed for internal Conversation projection tests |
 
 > This is an independent plugin, not an official DeepSeek or OpenAI product. Other DSH versions and platforms need separate verification. The following setup does not install the plugin into your everyday Desktop profile.
+
+### Install the prebuilt package
+
+If you already run DSH `0.2.1-rc.2` with a Web profile, install the prebuilt Release package without cloning or compiling the source:
+
+```sh
+dsh plugin --profile web add https://github.com/NingTiAn-byte/dsh-intelligent-ui/releases/download/v1.2.1/dsh-intelligent-ui.tgz --ignore-scripts
+```
+
+Replace `web` with your actual profile name. Refresh or restart as instructed by the host; model settings belong to that profile. The steps below cover source development and an isolated instance.
 
 ### 1. Get the source and build
 
@@ -138,6 +148,16 @@ Show me what a visualization of the FFT algorithm looks like.
 
 **Expected result:** an interactive FFT explanation appears in the DSH conversation. Ask for adjustable sample counts, input signals or a step-by-step calculation if you want those controls; the actual interface depends on the model's generated document.
 
+<a id="demo-explanation"></a>
+
+#### Demo video: interactive FFT explanation
+
+A recording of the interface in use, approximately 49 seconds: explore the FFT explanation, switch input signals and inspect the visualization inside the conversation.
+
+https://github.com/user-attachments/assets/b8585aaf-acec-4aef-8c22-271d9712d46f
+
+[View or download the original MP4](docs/demos/explanation.mp4)
+
 ### More prompts to try
 
 <details>
@@ -164,7 +184,7 @@ Label the source as “user-provided synthetic data” and retain a readable dat
 <summary><strong>Explore AMap places with itinerary playback</strong></summary>
 
 ```text
-Use AMap to introduce the Bund, Wukang Road and Lujiazui. Set the city to Shanghai.
+Use AMap to introduce Yu Garden, the Bund, East Nanjing Road, Lujiazui, Wukang Road and Xintiandi. Set the city to Shanghai.
 Resolve the place names, add place cards, selection and itinerary playback, and retain source links.
 ```
 
@@ -173,6 +193,16 @@ Configure a Web-service key as described under [AMap](#use-amap). Its bounded st
 Initial preparation requires network access. Stops without verifiable coordinates appear in an unresolved-location notice while confirmed stops remain visible. If no stop can be located, the tool returns an error. Basemap, permission and quota failures report their specific cause. Connections are not road navigation.
 
 </details>
+
+<a id="demo-map"></a>
+
+#### Demo video: a six-stop Shanghai itinerary
+
+A recording of the interface in use, approximately 15 seconds: explore six places on the AMap basemap, their place cards and itinerary playback.
+
+https://github.com/user-attachments/assets/f0c09349-31e8-40ab-8ec4-137fc49d2de1
+
+[View or download the original MP4](docs/demos/map.mp4)
 
 <details>
 <summary><strong>Build a small game</strong></summary>
@@ -185,6 +215,16 @@ Include start, pause, restart, score and instructions.
 Generated games and scientific simulations still need hands-on correctness checks.
 
 </details>
+
+<a id="demo-game"></a>
+
+#### Demo video: retro brick-breaker game
+
+A recording of the interface in use, approximately 19 seconds: a retro handheld console and brick-breaker game generated inside the conversation.
+
+https://github.com/user-attachments/assets/75ea5215-ed3f-4e43-b1ba-41be68d12751
+
+[View or download the original MP4](docs/demos/game.mp4)
 
 ### Check the complete flow
 
