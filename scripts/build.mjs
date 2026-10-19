@@ -29,6 +29,7 @@ await build({ ...common, entryPoints: ['src/mcp/stdio.ts'], outfile: 'lib/mcp-st
 await build({ ...common, entryPoints: ['src/shared/images.ts'], outfile: 'lib/image-protocol.js', platform: 'node', format: 'esm' })
 await build({ ...common, entryPoints: ['src/host/images.ts'], outfile: 'lib/images.js', platform: 'node', format: 'esm', packages: 'external' })
 await build({ ...common, entryPoints: ['src/host/street-map.ts'], outfile: 'lib/street-map.js', platform: 'node', format: 'esm', packages: 'external' })
+await build({ ...common, entryPoints: ['src/host/amap.ts'], outfile: 'lib/amap.js', platform: 'node', format: 'esm', packages: 'external' })
 await build({ ...common, entryPoints: ['src/client/sandbox.ts'], outfile: 'lib/sandbox.js', platform: 'browser', format: 'esm' })
 await build({ ...common, entryPoints: ['src/client/protocol.ts'], outfile: 'lib/protocol.js', platform: 'browser', format: 'esm' })
 await build({ ...common, entryPoints: ['src/shared/templates.ts'], outfile: 'lib/templates.js', platform: 'node', format: 'esm' })

@@ -13,6 +13,7 @@ import { imageLabels } from './image-runtime.ts'
 export interface WidgetProps {
   document: UiDocument
   phase?: UiPhase
+  error?: string
   callId?: string
   theme?: UiTheme
   /** Resolves when DSH accepts the queued prompt, not when a model finishes. */
@@ -32,7 +33,7 @@ const runKeys: Record<RunStatus, CopyKey> = { queued: 'runQueued', running: 'run
 export const RUN_OBSERVATION_TIMEOUT_MS = 300000
 
 /** Documents replay; transient values reset only on reset/remount, not resize or receipts. */
-export function Widget({ document: doc, phase = 'ready', callId, theme = DEFAULT_THEME, sendPrompt, runSnapshot, setTheme, t }: WidgetProps) {
+export function Widget({ document: doc, phase = 'ready', error, callId, theme = DEFAULT_THEME, sendPrompt, runSnapshot, setTheme, t }: WidgetProps) {
   const frame = useRef<HTMLIFrameElement>(null)
   const [generation, setGeneration] = useState(0)
   const [request, setRequest] = useState<BridgeRequest | null>(null)
@@ -172,6 +173,7 @@ export function Widget({ document: doc, phase = 'ready', callId, theme = DEFAULT
     </header>
     {doc.description && <details className="iui-widget-description"><summary>{t('widgetDetails')}</summary><p>{doc.description}</p></details>}
     <p className="iui-runtime" data-settled={phase === 'ready' && ready && !issues.length} role={phase === 'failed' ? 'alert' : 'status'} data-ui-phase={phase} data-runtime-status>{t(phase === 'generating' ? 'streamGenerating' : phase === 'failed' ? 'streamFailed' : issues.length ? 'runtimeFailed' : ready ? 'runtimeReady' : 'runtimeLoading')}</p>
+    {phase === 'failed' && error && <pre data-tool-error style={{ padding: 12, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{error}</pre>}
     <iframe key={channel} ref={frame} title={doc.title} srcDoc={source} sandbox="allow-scripts" referrerPolicy="no-referrer"
       onLoad={() => frame.current?.contentWindow?.postMessage({ channel, kind: 'connect' }, '*')}
       style={{ width: '100%', height, border: 0, display: 'block' }} />

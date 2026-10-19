@@ -1,7 +1,6 @@
-param([string]$Harness = $env:DSH_SOURCE, [switch]$NoOpen)
+param([switch]$NoOpen)
 $ErrorActionPreference = 'Stop'
 $pluginRoot = Split-Path $PSScriptRoot
-if ($Harness) { $env:DSH_SOURCE = $Harness }
 Push-Location $pluginRoot
 try {
   $previewArgs = @('scripts/preview.mjs')

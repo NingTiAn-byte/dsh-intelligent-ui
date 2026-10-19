@@ -26,7 +26,7 @@ The model supplies source or structured tool parameters. The Host validates and 
 
 ## 集成边界 / Integration boundaries
 
-- DSH 自有模块由源码 checkout 提供；普通运行依赖和开发工具由本项目锁文件管理。
+- DSH 开发 SDK、普通运行依赖和开发工具均由本项目锁文件管理；发布运行时复用宿主 rc.2 peer 服务。内部 Conversation 测试另读取匹配版本的官方源码。
 - React 通过 DSH 的客户端模块工厂协议共享，不向宿主注入另一份 React 身份。
 - 独立 MCP 复用文档校验与装配代码，返回 HTML 文本与结构化结果。MCP 本身不创建聊天卡片，也不拥有 DSH 的会话权限。
 - 只读工作流是展示快照，原生 todo/plan 才是任务状态来源。会议选择通过原生人工问答，不创建日历事件。

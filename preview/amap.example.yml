@@ -1,0 +1,7 @@
+# Copy to amap.local.yml (ignored by Git). Put DSH_AMAP_KEY in the plugin root .env.
+# Run: pwsh -File scripts/run-dsh.ps1 -ImageNetworkPatch preview/amap.local.yml
+- id: intelligent-ui
+  config:
+    mapProvider: amap
+    # amapEnvFile: '/absolute/path/to/.env' # Optional override
+    amapTimeoutMs: 15000

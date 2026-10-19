@@ -15,7 +15,7 @@ import { ProxyAgent } from 'undici'
 
 export const name = 'intelligent-ui'
 export const inject = ['tools', 'systemPrompt', 'sessionProjections']
-export interface Config { maxDocumentChars: number; minHeight: number; maxHeight: number; routing: 'model' | 'off'; imagesEnabled?: boolean; imageMaxBytes?: number; imageTimeoutMs?: number; imageProxyUrl?: string; mapCacheDir?: string }
+export interface Config { maxDocumentChars: number; minHeight: number; maxHeight: number; routing: 'model' | 'off'; imagesEnabled?: boolean; imageMaxBytes?: number; imageTimeoutMs?: number; imageProxyUrl?: string; mapCacheDir?: string; mapProvider?: 'amap' | 'openfreemap'; amapEnvFile?: string; amapKeyFile?: string; amapTimeoutMs?: number }
 export const Config: z<Config> = z.object({
   maxDocumentChars: z.number().min(1000).max(200000).default(200000),
   minHeight: z.number().min(180).max(900).default(180),
@@ -26,6 +26,10 @@ export const Config: z<Config> = z.object({
   imageTimeoutMs: z.number().min(1000).max(60000).default(15000),
   imageProxyUrl: z.string().default(''),
   mapCacheDir: z.string().default(''),
+  mapProvider: z.union(['amap', 'openfreemap']).default('openfreemap'),
+  amapEnvFile: z.string().default(''),
+  amapKeyFile: z.string().default(''),
+  amapTimeoutMs: z.number().min(1000).max(60000).default(15000),
 })
 
 export function apply(ctx: Context, config: Config): void {

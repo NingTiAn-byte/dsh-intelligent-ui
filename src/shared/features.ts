@@ -1,6 +1,7 @@
 import type { UiDocument } from './document.ts'
 import world from '../../vendor/leaflet/1.9.4/world-data.txt'
 import { parseStreetMap, type StreetMap } from './street-map.ts'
+import type { AmapSnapshot } from '../host/amap.ts'
 
 export const COMPONENT_TOOLS = ['render_intelligent_map', 'render_intelligent_chart', 'plan_intelligent_ui', 'render_intelligent_workflow', 'choose_intelligent_meeting_time'] as const
 export interface MapStop { name: string; latitude: number; longitude: number; description: string; source: string; imageId?: string }
@@ -24,18 +25,18 @@ export function parseMap(value: unknown): MapSpec | null {
 const json = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c')
 const escape = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 /** The same bounded, deterministic components are used by Host and standalone MCP. */
-export function mapDocument(spec: MapSpec, streetData?: StreetMap): UiDocument {
+export function mapDocument(spec: MapSpec, streetData?: StreetMap, amapData?: AmapSnapshot): UiDocument {
   const valid = parseMap(spec); if (!valid) throw new Error('Invalid map: 1–30 stops, coordinates, sources, basemap and 1–120 second duration required.')
   const streets = streetData === undefined ? undefined : parseStreetMap(streetData)
-  if (streetData !== undefined && !streets || valid.basemap === 'street' && !streets) throw new Error('A street map requires validated geographic data')
+  if (streetData !== undefined && !streets || valid.basemap === 'street' && !streets && !amapData) throw new Error('A street map requires validated geographic data')
   return { version: 2, libraries: ['leaflet-1.9.4'], title: valid.title, description: '地点与行程', height: 700,
     html: '<section><header class="iui-page-header"><div><p class="iui-eyebrow">地点与行程</p><h2 id="map-title"></h2></div><span class="iui-badge">' + valid.stops.length + ' 个地点</span></header><div id="iui-map" role="region" aria-label="行程地图" style="height:360px"></div><p id="map-status" role="status"></p><div class="actions iui-map-actions"><button class="iui-primary" id="trip-play">播放行程</button><button id="trip-pause">暂停</button><button id="trip-reset">重播</button><button id="trip-fit">查看全部</button></div><progress id="trip-progress" max="1" value="0" aria-label="行程进度"></progress><p class="note">站点之间按顺序连线</p><div id="trip-stops">' + valid.stops.map((s, i) => `<article class="trip-card"><button class="trip-stop-button">${i + 1}. ${escape(s.name)}</button><p class="trip-description">${escape(s.description.trim() || `${s.name}介绍`)}</p>${s.imageId ? `<figure data-iui-image="${s.imageId}"></figure>` : ''}</article>`).join('') + '</div></section>',
     css: '#iui-map svg{display:initial;width:initial;height:initial;max-width:none;margin:0}.iui-pin-core{width:100%;height:100%;background:#376df4;color:white;border:2px solid white;border-radius:50%;display:grid;place-items:center;font-weight:600;box-shadow:0 2px 6px #0003}.iui-pin.active .iui-pin-core{background:#e05824}.leaflet-container{color:#18202a}',
-    javascript: `(${mapRuntime.toString()})(${json(valid)},${json(streets ? '' : world.trim())},${json(streets ?? null)});` }
+    javascript: `(${mapRuntime.toString()})(${json(valid)},${json(streets || amapData ? '' : world.trim())},${json(streets ?? null)},${json(amapData ?? null)});` }
 }
 
 /** Serialized; depend only on browser globals and the bundled Leaflet. */
-function mapRuntime(spec: MapSpec, worldData: string, streetData: StreetMap | null): void {
+function mapRuntime(spec: MapSpec, worldData: string, streetData: StreetMap | null, amapData: AmapSnapshot | null): void {
   const w = window as any; const L = w.L
   if (L?.version !== '1.9.4') throw new Error('Map runtime unavailable')
   const byId = (id: string) => document.getElementById(id)!
@@ -45,7 +46,13 @@ function mapRuntime(spec: MapSpec, worldData: string, streetData: StreetMap | nu
   const map = L.map('iui-map', { minZoom: 1, maxZoom: streetData || spec.basemap === 'usgs' ? 18 : 16, worldCopyJump: true, attributionControl: true })
   map.setView([spec.stops[0].latitude, spec.stops[0].longitude], 3)
   map.attributionControl.setPrefix(false)
-  if (!streetData) L.imageOverlay(worldData, [[-85.05112878, -180], [85.05112878, 180]], { interactive: false, attribution: 'NASA Blue Marble · NASA Earth Observatory / GEBCO' }).addTo(map)
+  if (amapData) {
+    const [south, west, north, east] = amapData.bounds
+    L.imageOverlay(amapData.dataUrl, [[south, west], [north, east]], { interactive: false, attribution: '© 高德地图 AMap' }).addTo(map)
+    map.setMaxBounds([[south, west], [north, east]])
+    map.options.maxBoundsViscosity = 1
+  }
+  else if (!streetData) L.imageOverlay(worldData, [[-85.05112878, -180], [85.05112878, 180]], { interactive: false, attribution: 'NASA Blue Marble · NASA Earth Observatory / GEBCO' }).addTo(map)
   else {
     byId('iui-map').style.background = '#f4f2eb'
     const [south, west, north, east] = streetData.bounds
@@ -69,7 +76,8 @@ function mapRuntime(spec: MapSpec, worldData: string, streetData: StreetMap | nu
     })
   }
   const status = byId('map-status')
-  if (!streetData && spec.basemap !== 'world') {
+  if (amapData) status.textContent = '高德底图快照；支持标记与行程交互，放大不会加载新的地图细节。'
+  if (!streetData && !amapData && spec.basemap !== 'world') {
     const url = spec.basemap === 'nasa'
       ? 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg'
       : 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}'
@@ -122,7 +130,7 @@ function mapRuntime(spec: MapSpec, worldData: string, streetData: StreetMap | nu
     // Fitting then chooses an invalid scale; let the first real resize fit once.
     map.invalidateSize({ pan: false })
     const size = map.getSize(); if (size.x < 80 || size.y < 80) return
-    if (points.length === 1) map.setView(points[0], streetData ? 14 : 5, { animate: false })
+    if (points.length === 1) map.setView(points[0], streetData || amapData ? 14 : 5, { animate: false })
     else map.fitBounds(L.latLngBounds(points), { padding: [35, 35], maxZoom: 16, animate: false })
     if (streetData) map.setMinZoom(Math.max(1, map.getBoundsZoom([[streetData.bounds[0], streetData.bounds[1]], [streetData.bounds[2], streetData.bounds[3]]], false)))
     fitted = true

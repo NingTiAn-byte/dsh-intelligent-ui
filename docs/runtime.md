@@ -56,6 +56,10 @@ Declare `chartjs-4.5.1` to use global `Chart`; give the canvas a relatively posi
 
 ## 数据与可访问性 / Data and accessibility
 
+控件行可使用 `.iui-control-row`，A/B 等一组动作键可使用 `.iui-action-keys`。控件组会按自身容器的宽度换行，适用于宽页面里的窄侧栏；不要仅依赖视口断点。方向键、动作键和间距的总宽度超过面板内容宽度时，应分行，保留可点击尺寸，避免用隐藏溢出或负偏移掩盖问题。这些类需生成文档主动采用，不会自动重排任意历史 HTML。
+
+Use `.iui-control-row` for wrapping control groups and `.iui-action-keys` for grouped action buttons. Wrapping follows the actual container width, including narrow desktop sidebars. Keep usable targets instead of hiding overflow or applying negative offsets. These classes are opt-in; they do not automatically rewrite arbitrary saved HTML.
+
 数值需说明单位、假设与来源；模拟数据应明确标识。图片保留作者、许可与来源，地点介绍用文字超链接，不必把内部定位坐标展示给用户。动画提供暂停和重置，控件保留键盘操作、标签与可见焦点。
 
 Keep units, assumptions, provenance and image attribution visible. Link location descriptions to their sources. Provide pause/reset controls for animation and keyboard-accessible labelled controls with visible focus.

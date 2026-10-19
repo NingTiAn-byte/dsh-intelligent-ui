@@ -26,6 +26,15 @@ async function browserTest(run) {
     await run(page, context)
   } finally { await browser.close() }
 }
+
+test('failed map card shows its tool reason as text and keeps generated scripts inactive', { timeout: 15000 }, () => browserTest(async page => {
+  const error = 'Error: 无法确定安福路的坐标 <img src=x onerror=alert(1)>'
+  await page.evaluate(({ doc, error }) => window.uiChecks.stream(doc, 'failed', true, error), { doc, error })
+  await page.locator('[data-tool-error]').waitFor()
+  assert.equal(await page.locator('[data-tool-error]').textContent(), error)
+  assert.equal(await page.locator('[data-tool-error] img').count(), 0)
+  assert.equal(await page.frameLocator('iframe').locator('.iui-pin').count(), 0)
+}))
 test('street geometry and all three photos draw offline, attach to their own cards and survive host theme changes', { timeout: 15000 }, () => browserTest(async page => {
   const requests = []; page.on('request', r => { if (/^https?:/.test(r.url())) requests.push(r.url()) })
   await page.evaluate(doc => window.uiChecks.mount(doc), doc)

@@ -83,3 +83,40 @@ test('unresolved place does not get invented coordinates or a successful blank m
     assert.equal(r.isError, true); assert.equal(r.meta?.intelligentUi, undefined); assert.match(r.content[0].text, /无法确定/)
   } finally { setGlobalDispatcher(old); await mock.close(); await ctx.fiber.dispose() }
 })
+
+test('map follows exact interlanguage coordinates and keeps unresolved stops visible without losing resolved photo identity', async () => {
+  const ctx = new Context(), mock = new MockAgent(), old = getGlobalDispatcher(); mock.disableNetConnect(); setGlobalDispatcher(mock)
+  try {
+    for (const p of [Tools, SystemPrompt, SessionProjectionRegistry]) await ctx.plugin(p)
+    await ctx.plugin(plugin, { maxDocumentChars: 200000, minHeight: 180, maxHeight: 900, routing: 'off' })
+    const page = (host, title, value) => mock.get(`https://${host}.wikipedia.org`).intercept({ path: p => new URL('https://example.org' + p).searchParams.get('titles') === title }).reply(200, { query: { pages: [value] } }, { headers })
+    page('zh', '安福路', { ns: 0, title: '安福路' })
+    page('zh', '武康路', { ns: 0, title: '武康路', langlinks: [{ lang: 'en', title: 'Wukang Road' }] })
+    page('en', 'Wukang Road', { ns: 0, title: 'Wukang Road', coordinates: [{ lat: 31.2076, lon: 121.4401 }] })
+    const r = await ctx.tools.execute({ callId: 'partial-trip', name: 'render_intelligent_map', arguments: {
+      title: '上海行程', basemap: 'world', stops: [{ name: '<安福路>', wikipediaTitle: '安福路' }, { name: '武康路' }],
+    }, signal: new AbortController().signal })
+    assert.equal(r.isError, false, JSON.stringify(r.content))
+    const doc = parseDocument(r.meta.intelligentUi); assert.ok(doc)
+    assert.match(doc.description, /1 个地点已定位，1 个地点未定位/)
+    assert.match(doc.html, /data-map-unresolved/); assert.match(doc.html, /&lt;安福路&gt;/)
+    assert.equal(doc.images.length, 1)
+    assert.equal(doc.images[0].wikipediaTitle, 'Wukang Road')
+    assert.equal(doc.images[0].alt, '武康路')
+    assert.match(doc.javascript, /31\.2076/)
+    mock.assertNoPendingInterceptors()
+  } finally { setGlobalDispatcher(old); await mock.close(); await ctx.fiber.dispose() }
+})
+
+test('Latin Wikipedia titles paired with zh retry the exact English article, without searching or inventing coordinates', async () => {
+  const ctx = new Context(), mock = new MockAgent(), old = getGlobalDispatcher(); mock.disableNetConnect(); setGlobalDispatcher(mock)
+  try {
+    for (const p of [Tools, SystemPrompt, SessionProjectionRegistry]) await ctx.plugin(p)
+    await ctx.plugin(plugin, { maxDocumentChars: 200000, minHeight: 180, maxHeight: 900, routing: 'off' })
+    mock.get('https://zh.wikipedia.org').intercept({ path: p => p.includes('Wukang') }).reply(200, { query: { pages: [{ ns: 0, title: 'Wukang Road', missing: true }] } }, { headers })
+    mock.get('https://en.wikipedia.org').intercept({ path: p => p.includes('Wukang') }).reply(200, { query: { pages: [{ ns: 0, title: 'Wukang Road', coordinates: [{ lat: 31.2076, lon: 121.4401 }] }] } }, { headers })
+    const r = await ctx.tools.execute({ callId: 'english-trip', name: 'render_intelligent_map', arguments: { title: '武康路', basemap: 'world', photos: 'none', stops: [{ name: '武康路', wikipediaTitle: 'Wukang Road', language: 'zh' }] }, signal: new AbortController().signal })
+    assert.equal(r.isError, false, JSON.stringify(r.content)); assert.match(r.meta.intelligentUi.javascript, /en\.wikipedia/)
+    mock.assertNoPendingInterceptors()
+  } finally { setGlobalDispatcher(old); await mock.close(); await ctx.fiber.dispose() }
+})

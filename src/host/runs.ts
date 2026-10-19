@@ -1,5 +1,5 @@
 import type {} from '@deepseek-ai/dsh-agent/types'
-import type {} from '@deepseek-ai/dsh-session-controller/types'
+import type {} from '@deepseek-ai/dsh-api-session-controller/types'
 import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import type { UserMessage } from '@deepseek-ai/dsh-session'
 import { z } from 'zod'

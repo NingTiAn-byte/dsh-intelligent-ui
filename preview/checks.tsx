@@ -12,7 +12,7 @@ import type { RunSnapshot } from '../src/shared/runs.ts'
 interface Checks {
   mount: (document: UiDocument, mode?: 'ok' | 'fail' | 'defer') => void
   unmount: () => void
-  stream: (document: UiDocument, phase: UiPhase, newCall?: boolean) => void
+  stream: (document: UiDocument, phase: UiPhase, newCall?: boolean, error?: string) => void
   setTheme: (theme: UiTheme) => void
   table: (value: unknown, phase?: UiPhase) => void
   runs: (value?: RunSnapshot) => void
@@ -27,11 +27,12 @@ const root = createRoot(document.getElementById('root')!)
 let generation = 0
 let currentDocument: UiDocument | null = null
 let currentPhase: UiPhase = 'ready'
+let currentError: string | undefined
 let currentTheme = makeTheme()
 let runSnapshot: RunSnapshot | undefined
 let currentTable: { table: UiTable | null; phase: UiPhase } | null = null
 function render(): void {
-  root.render(currentTable ? <TableCard table={currentTable.table} phase={currentTable.phase} title="测试表格" callId="table-check" theme={currentTheme} t={key => zh[key]} /> : currentDocument && <Widget key={generation} callId="check-call" runSnapshot={runSnapshot} document={currentDocument} phase={currentPhase} theme={currentTheme}
+  root.render(currentTable ? <TableCard table={currentTable.table} phase={currentTable.phase} title="测试表格" callId="table-check" theme={currentTheme} t={key => zh[key]} /> : currentDocument && <Widget key={generation} callId="check-call" runSnapshot={runSnapshot} document={currentDocument} phase={currentPhase} error={currentError} theme={currentTheme}
     t={(key, params) => zh[key].replace('{message}', params?.message ?? '')}
     setTheme={value => { currentTheme = makeTheme(value === 'system' ? 'light' : value); render() }}
     sendPrompt={async (text, requestId) => {
@@ -45,13 +46,15 @@ const checks: Checks = {
   mode: 'ok', sent: [], messages: [], requests: [],
   runs: value => { runSnapshot = value; render() },
   mount: (document, mode = 'ok') => {
+    currentError = undefined
     currentTable = null
     runSnapshot = undefined
     checks.mode = mode; checks.sent = []; checks.messages = []; checks.requests = []; checks.finish = undefined
     generation++; currentDocument = document; currentPhase = 'ready'; render()
   },
   unmount: () => { currentDocument = null; currentTable = null; render() },
-  stream: (document, phase, newCall = false) => {
+  stream: (document, phase, newCall = false, error) => {
+    currentError = error
     currentTable = null
     if (newCall) { generation++; checks.messages = []; checks.sent = [] }
     currentDocument = document; currentPhase = phase; render()

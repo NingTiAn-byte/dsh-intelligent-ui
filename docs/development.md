@@ -2,13 +2,19 @@
 
 ## 可重现构建 / Reproducible setup
 
-执行 `npm ci`，设置 `DSH_SOURCE` 指向已构建的 `0.2.1-alpha.4` 源码，再执行 `npm run build` 和 `npm run check`。`package-lock.json` 固定普通依赖；DSH 的版本与源码构建是另一项必要前提。
+执行 `npm ci`、`npm run build`、`npm run check`。构建与类型检查直接使用锁文件中的 rc.2 SDK，无需源码 checkout，也不再链接旧 alpha.4 包。
 
-Run `npm ci`, point `DSH_SOURCE` at a built `0.2.1-alpha.4` checkout, then run `npm run build` and `npm run check`. The lockfile pins regular dependencies; the matching built DSH source is a separate prerequisite.
+Run `npm ci`, `npm run build`, and `npm run check`. Builds use pinned rc.2 SDK packages without source-checkout links.
 
-`scripts/environment.mjs` 为 Host 类型与运行模块建立链接。切换 DSH checkout 后，应先移除旧项目依赖目录并重新 `npm ci`，避免沿用指向原 checkout 的链接；不要修改 DSH 的包目录来迁就本插件。
+内部 Conversation 投影测试需官方 `dsh-v0.2.1-rc.2` 标签源码（无需构建宿主）：
 
-The environment helper links Host packages. When switching checkouts, recreate this project's dependency directory with `npm ci` to avoid retaining links to the previous checkout.
+```sh
+git clone --depth 1 --branch dsh-v0.2.1-rc.2 --filter=blob:none --sparse https://github.com/deepseek-ai/deepseek-harness.git artifacts/rc2-source
+git -C artifacts/rc2-source sparse-checkout set packages/client/ui-conversation packages/client/ui-chat packages/util/values
+node --test --test-isolation=none tests/stream-projection.test.mjs
+```
+
+可通过 `DSH_SOURCE` 指定已有 rc.2 checkout；测试拒绝其他版本。`npm test` 包含这组内部投影测试，因此也需要上述源码。普通构建及其他测试无需它。标签 commit 为 `687f282e8625c6b8d11ff58211a90524be2e4317`。
 
 构建校验 vendor manifest 的 SHA-256 与字节数，生成 `lib/`、`dist/mcp/`、静态预览及本机 overlay/MCP 配置。所有生成文件均被 Git 忽略。升级图库应添加新版本标识及兼容方案，并保留第三方许可。
 

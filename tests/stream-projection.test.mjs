@@ -5,11 +5,12 @@ import { join } from 'node:path'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
 import { createRequire } from 'node:module'
-import { harness, resolveExisting } from '../scripts/environment.mjs'
+import { harness, resolveExisting, requireProjectionSource } from '../scripts/environment.mjs'
 import { getTemplate } from '../lib/templates.js'
 import { document as imageDocument } from './image-fixture.mjs'
 import { mapDocument, chartDocument, planDocument, workflowDocument, meetingDocument } from '../lib/features.js'
 const { tsImport } = await import(pathToFileURL(resolveExisting('tsx/esm/api')).href)
+requireProjectionSource()
 const load = relative => tsImport(pathToFileURL(join(harness, relative)).href, import.meta.url)
 const { ConversationNodeAssembler } = await load('packages/client/ui-conversation/src/client/conversation/assembler.ts')
 const { toolDefinition } = await load('packages/client/ui-chat/src/client/conversation-nodes/tool.ts')
@@ -20,6 +21,18 @@ let factory
 runInNewContext(readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8'), { URL, window: { __ModuleLoader__: { load: row => { factory = row.factory } } } })
 const { streamDefinition, collectStreamResults, collectPresentationResults } = factory(createRequire(import.meta.url))
 const doc = { version: 1, title: 'Projection', description: '', height: 300, css: 'p{color:green}', html: '<p>Hello</p>', javascript: 'window.runs=1' }
+
+test('failed map results retain the actual tool error during live projection and saved replay', () => {
+  const h = setup()
+  const call = event('tool/call', 3, { step: 1, callId: 'map-error', name: 'render_intelligent_map', arguments: '{"title":"上海行程"}' })
+  h.assembler.append(call)
+  const result = event('tool/result', 4, { step: 1, message: { role: 'tool', source: { callId: 'map-error' }, content: [{ type: 'text', text: 'Error: 无法确定安福路的坐标' }], isError: true } }, { surfaceOp: 'append' })
+  h.assembler.append(result)
+  const row = h.read().results[0]
+  assert.equal(row.phase, 'failed'); assert.match(row.error, /安福路/); assert.equal(row.document.javascript, '')
+  h.assembler.replaceWindow(JSON.parse(JSON.stringify([call, result])), false)
+  assert.match(h.read().results[0].error, /安福路/)
+})
 test('all specialized tools retain one permanent node through native and PTC execution and JSON history replay', () => {
   const documents = [
     ['render_intelligent_map', mapDocument({ title: '香港', basemap: 'world', durationMs: 6000, stops: [{ name: '香港', latitude: 22.3, longitude: 114.2, description: '', source: '用户坐标' }] })],

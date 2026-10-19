@@ -5,7 +5,7 @@ import { tableFromMeta, TABLE_TOOL_NAME, type UiTable } from '../shared/table.ts
 import { COMPONENT_TOOLS } from '../shared/features.ts'
 
 export type UiPhase = 'generating' | 'ready' | 'failed'
-export interface UiStreamResult { readonly callId: string; readonly document: UiDocument; readonly phase: UiPhase }
+export interface UiStreamResult { readonly callId: string; readonly document: UiDocument; readonly phase: UiPhase; readonly error?: string }
 export type PresentationResult = (UiStreamResult & { kind: 'ui' }) | {
   kind: 'table'; callId: string; table: UiTable | null; title: string; phase: UiPhase
 }
@@ -53,7 +53,8 @@ export function collectStreamResults(nodes: readonly ToolChatData[], turn: UiTur
           html: invalid ? '' : html, css: invalid || !args.complete('css') ? '' : css,
           javascript: '', height: typeof height === 'number' && Number.isFinite(height) && height >= 180 && height <= 900 ? height : 300,
         }
-        results.set(block.callId, { callId: block.callId, document, phase: complete || interrupted || invalid ? 'failed' : 'generating' })
+        const error = complete && block.isError ? block.content?.filter(part => part.type === 'text').map(part => part.text).join('\n').slice(0, 2000) : undefined
+        results.set(block.callId, { callId: block.callId, document, phase: complete || interrupted || invalid ? 'failed' : 'generating', ...(error ? { error } : {}) })
       }
     }
     for (const child of block.subCalls) visit(child)

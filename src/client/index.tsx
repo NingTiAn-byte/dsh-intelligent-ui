@@ -16,7 +16,8 @@ import { streamDefinition } from './stream-definition.ts'
 import { collectStreamResults, collectPresentationResults } from './stream-results.ts'
 import { en, zh, type CopyKey } from './copy.ts'
 import { RUN_KEY, runRpcId, type RunSnapshot } from '../shared/runs.ts'
-import type { SessionRequestId } from '@deepseek-ai/dsh-session-controller/types'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { SessionRequestId } from '@deepseek-ai/dsh-api-session-controller/types'
 import { COMPONENT_TOOLS } from '../shared/features.ts'
 export { collectResults } from './results.ts'
 export { collectStreamResults, collectPresentationResults, streamDefinition }
@@ -52,7 +53,7 @@ function IntelligentUiResults({ node, useResults, useTheme, useRuns, sendPrompt,
   const results = collectPresentationResults((nodes ?? []).filter(row => row.root.callId === node.data.rootCallId), node.data)
   return <div data-intelligent-ui-results data-intelligent-ui-turn={node.data.turn}>{results.map(result =>
     result.kind === 'table' ? <TableCard key={result.callId} callId={result.callId} table={result.table} title={result.title} phase={result.phase} theme={theme} t={t} />
-      : <Widget key={result.callId} callId={result.callId} document={result.document} phase={result.phase} theme={theme} runSnapshot={runs}
+      : <Widget key={result.callId} callId={result.callId} document={result.document} phase={result.phase} error={result.error} theme={theme} runSnapshot={runs}
           sendPrompt={(text, requestId) => sendPrompt(text, requestId, result.callId)} setTheme={setTheme} t={t} />)}</div>
 }
 export const inject = ['slots', 'locale', 'conversation', 'sessions', 'uiConversation', 'theme']
@@ -71,12 +72,12 @@ export function apply(ctx: Context): void {
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
     name: 'conversation.chat.node', key: 'intelligent-ui', locale: 'intelligentUi',
     inject: sessionId => {
-      const scoped = sessions.scope(sessionId)
+      const scoped = sessions.scope(sessionId as SessionId)
       if (!scoped) throw new Error('Intelligent UI session scope is unavailable')
       // A Session scope is a foreign Cordis context; resolve through its public lookup.
       const conversation = scoped.get('conversation')
       if (!conversation) throw new Error('Intelligent UI requires a scoped DSH conversation')
-      const binding = sessions.binding(sessionId)
+      const binding = sessions.binding(sessionId as SessionId)
       if (!binding) throw new Error('Intelligent UI session binding is unavailable')
       const chat = ctx.uiConversation.binding(binding).target('chat')
       return {
