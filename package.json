@@ -1,7 +1,6 @@
 {
-  "name": "dsh-intelligent-ui",
+  "name": "@ningtian-byte/dsh-intelligent-ui",
   "version": "1.2.1",
-  "private": true,
   "type": "module",
   "description": "Replayable sandboxed generative UI for DeepSeek Harness",
   "repository": {
@@ -67,7 +66,8 @@
     "verify:mcp": "node scripts/verify-mcp.mjs",
     "preview": "node scripts/preview.mjs",
     "preview:build": "npm run build",
-    "audit:release": "node scripts/audit-release.mjs"
+    "audit:release": "node scripts/audit-release.mjs",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@mapbox/vector-tile": "2.0.4",
@@ -79,6 +79,9 @@
     "zod": "4.4.3"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.0.5",
     "@deepseek-ai/dsh-agent": "0.2.1-rc.2",

@@ -1,6 +1,6 @@
 - insert:
     - id: intelligent-ui
-      name: dsh-intelligent-ui
+      name: '@ningtian-byte/dsh-intelligent-ui'
       config:
         maxDocumentChars: 200000
         minHeight: 180
